@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "nodemon -- -r dotenv/config src/app.js"
+    "dev": "nodemon -- -r dotenv/config src/app.js",
+    "deploy": "./scripts/deploy.sh"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
