@@ -1,14 +1,13 @@
 {
   "scripts": {
-    "start": "node ./index.js",
-    "dev": "nodemon ./index.js",
-    "logs": "heroku logs --tail --app antonpi"
+    "dev": "nodemon -- -r dotenv/config src/app.js"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "firebase-admin": "^5.12.1",
-    "moment": "^2.22.1"
+    "moment": "^2.22.1",
+    "nodemon": "^1.18.9"
   }
 }
