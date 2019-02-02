@@ -1,13 +1,9 @@
-const firebase = require("firebase-admin")
-const serviceAccount = require("../firebaseServiceAccountKey.json")
+var firebase = require("firebase-admin")
+var serviceAccount = require("../firebaseServiceAccountKey.json")
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
-  databaseURL: "https://reddit-digests.firebaseio.com"
-})
-
-firebase.firestore().settings({
-  timestampsInSnapshots: true
+  databaseURL: "https://antonpi-6a7f5.firebaseio.com"
 })
 
 const db = firebase.firestore()
