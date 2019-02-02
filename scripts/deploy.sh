@@ -5,5 +5,6 @@ git reset --hard origin/master
 docker system prune --force
 docker build -t antonpi .
 docker stop antonpi-container || true
+docker rm antonpi-container || true
 docker run --rm -d -p 5001:5001 --env-file .env --name antonpi-container antonpi
 ENDSSH
