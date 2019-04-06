@@ -2,7 +2,8 @@ const process = require("process")
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
-const telegram = require("./telegram")
+const telegram = require("./integrations/telegram")
+const dropbox = require("./integrations/dropbox")
 
 const winston = require("winston")
 const expressWinston = require("express-winston")
@@ -26,20 +27,6 @@ app.use(
   })
 )
 
-app.get("/", (req, res) => {
-  return res.send({
-    routes: ["/notify/telegram", "input/telegram"]
-  })
-})
-
-app.post("/input/telegram", (req, res) => {
-  const payload = req.body
-
-  console.log(stringify(payload))
-
-  return res.sendStatus(200)
-})
-
 app.post("/notify/telegram", (req, res) => {
   const payload = req.body
 
@@ -47,6 +34,22 @@ app.post("/notify/telegram", (req, res) => {
 
   return res.sendStatus(200)
 })
+
+app.get('/dropbox/folders', async (req,res) => {
+	const folders = await dropbox.getFolders()
+
+	return res.send(folders)
+})
+
+app.get('/dropbox/thumbnails', async (req,res) => {
+	const files = await dropbox.getThumbnails()
+
+	console.log(files)
+
+	return res.set('Content-Type', 'image/jpeg').send(files)
+})
+
+app.use('*', (req, res) => res.sendStatus(404))
 
 app.listen(process.env.PORT, () => {
   console.log(`AntonPI is running on port ${process.env.PORT}`)
