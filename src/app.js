@@ -2,6 +2,7 @@ const process = require("process")
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
+const _ = require("lodash/fp")
 const telegram = require("./integrations/telegram")
 const dropbox = require("./integrations/dropbox")
 
@@ -35,21 +36,35 @@ app.post("/notify/telegram", (req, res) => {
   return res.sendStatus(200)
 })
 
-app.get('/dropbox/folders', async (req,res) => {
-	const folders = await dropbox.getFolders()
+app.get("/photos", async (req, res) => {
+  const files = await dropbox.getAllFiles()
 
-	return res.send(folders)
+  const mappedFiles = _.map(
+    _.pipe(
+      _.pick(["id", "rev", "path_lower", "name", "size"]),
+      photo =>
+        _.pipe(
+          _.set("url", `http://localhost:8888/photos/${photo.id}/thumbnail`),
+          _.set("size", { width: 960, height: 640 })
+        )(photo)
+    )
+  )(files)
+
+  return res.send(mappedFiles)
 })
 
-app.get('/dropbox/thumbnails', async (req,res) => {
-	const files = await dropbox.getThumbnails()
+app.get("/photos/:id/thumbnail", async (req, res) => {
+  const { id } = req.params
+  const file = await dropbox.getFile(id)
 
-	console.log(files)
+  if (!file) {
+    return res.sendStatus(404)
+  }
 
-	return res.set('Content-Type', 'image/jpeg').send(files)
+  return res.set("Content-Type", "image/jpeg").send(file)
 })
 
-app.use('*', (req, res) => res.sendStatus(404))
+app.use("*", (req, res) => res.sendStatus(404))
 
 app.listen(process.env.PORT, () => {
   console.log(`AntonPI is running on port ${process.env.PORT}`)
