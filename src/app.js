@@ -26,26 +26,16 @@ app.use(
   })
 )
 
-app.get("/", (req, res) => {
-  return res.send({
-    routes: ["/notify/telegram", "input/telegram"]
-  })
-})
-
-app.post("/input/telegram", (req, res) => {
-  const payload = req.body
-
-  console.log(stringify(payload))
-
-  return res.sendStatus(200)
-})
-
 app.post("/notify/telegram", (req, res) => {
   const payload = req.body
 
   telegram.sendMessage(stringify(payload))
 
   return res.sendStatus(200)
+})
+
+app.get("*", (req, res) => {
+  return res.sendStatus(404)
 })
 
 app.listen(process.env.PORT, () => {
