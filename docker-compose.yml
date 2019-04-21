@@ -1,0 +1,14 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: yarn dev
+    volumes:
+      - ./:/app
+    ports:
+      - "5001:5001"
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"
+

@@ -3,11 +3,12 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
 const _ = require("lodash/fp")
-const telegram = require("./integrations/telegram")
-const dropbox = require("./integrations/dropbox")
-
 const winston = require("winston")
 const expressWinston = require("express-winston")
+const config = require("config")
+const telegram = require("./integrations/telegram")
+const dropbox = require("./integrations/dropbox")
+const redis = require("./redis")
 
 const app = express()
 app.use(bodyParser.json())
@@ -28,6 +29,16 @@ app.use(
   })
 )
 
+app.get("/", (req, res) => {
+  return res.sendStatus(200)
+})
+
+app.get("/_cache", (req, res) => {
+  const data = redis.get("hejsan")
+
+  return res.send({ data })
+})
+
 app.post("/notify/telegram", (req, res) => {
   const payload = req.body
 
@@ -37,14 +48,18 @@ app.post("/notify/telegram", (req, res) => {
 })
 
 app.get("/photos", async (req, res) => {
-  const files = await dropbox.getAllFiles()
-
+  const { source, data: files } = await dropbox.getAllFiles()
   const mappedFiles = _.map(
     _.pipe(
       _.pick(["id", "rev", "path_lower", "name", "size"]),
       photo =>
         _.pipe(
-          _.set("url", `http://localhost:8888/photos/${photo.id}/thumbnail`),
+          _.set(
+            "url",
+            `http://${config.get("host")}:${config.get("port")}/photos/${
+              photo.id
+            }/thumbnail`
+          ),
           _.set("size", { width: 960, height: 640 })
         )(photo)
     )
@@ -66,6 +81,8 @@ app.get("/photos/:id/thumbnail", async (req, res) => {
 
 app.use("*", (req, res) => res.sendStatus(404))
 
-app.listen(process.env.PORT, () => {
-  console.log(`AntonPI is running on port ${process.env.PORT}`)
+const listener = app.listen(config.get("port"), () => {
+  console.log(
+    `> AntonPI running on ${config.get("host")}:${listener.address().port}`
+  )
 })

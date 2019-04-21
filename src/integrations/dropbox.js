@@ -1,17 +1,16 @@
 const axios = require("axios")
 const dropboxSdk = require("dropbox").Dropbox
 const fetch = require("isomorphic-fetch")
-
-const { DROPBOX_TOKEN } = process.env
+const config = require("config")
+const redis = require("../redis")
 
 const dbx = new dropboxSdk({
-  accessToken: DROPBOX_TOKEN,
+  accessToken: config.get("dropbox.token"),
   fetch
 })
 
 async function getFile(id) {
   const files = await getAllFiles()
-
   const requestedFile = files.find(f => f.id === id)
 
   if (!requestedFile) {
@@ -26,8 +25,6 @@ async function getFile(id) {
       }
     })
 
-    console.log(response)
-
     return response.fileBinary
   } catch (error) {
     console.error(error)
@@ -36,15 +33,23 @@ async function getFile(id) {
 }
 
 async function getAllFiles() {
-  try {
-    const response = await dbx.filesListFolder({
-      path: `/media/photos/featured`
-    })
+  const cacheKey = "dropbox.allfiles"
+  let response = redis.get(cacheKey)
+  let source = "cache"
 
-    return response.entries
-  } catch (error) {
-    return error
+  if (!response) {
+    try {
+      const response = await dbx.filesListFolder({
+        path: `/media/photos/featured`
+      })
+      source = "api"
+      redis.set(cacheKey, response)
+    } catch (error) {
+      return error
+    }
   }
+
+  return { source, data: response.entries }
 }
 
 module.exports = {
