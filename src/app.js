@@ -43,7 +43,7 @@ app.post("/input/telegram", (req, res) => {
 app.post("/notify/telegram", (req, res) => {
   const payload = req.body
 
-  telegram.sendMessage(stringify(payload.message))
+  telegram.sendMessage(stringify(payload))
 
   return res.sendStatus(200)
 })
