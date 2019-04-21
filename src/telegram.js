@@ -2,6 +2,7 @@ const crypto = require("crypto")
 const axios = require("axios")
 const _ = require("lodash/fp")
 const firebase = require("./firebase")
+const logger = require("./logger")
 
 const prefixUrl = method =>
   `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/${method}`
@@ -25,24 +26,24 @@ const onUpdate = async payload => {
   const update_id = payload.update_id
 
   if (!message || !message.text) {
-    log("Invalid update", payload)
+    logger.info("Invalid update", payload)
     return
   }
 
-  log(`Received update #${update_id} from chat #${message.chat.id}`)
+  logger.info(`Received update #${update_id} from chat #${message.chat.id}`)
 
   const updateExists = await firebase.telegramUpdateExists(update_id)
 
   // Don't act on updates already stored.
   if (updateExists) {
-    log(`Update #${update_id} has already been handled`)
+    logger.info(`Update #${update_id} has already been handled`)
     return
   }
 
   // Grab the previous update, and store the current one.
-  const previousUpdate = await firebase.getPreviousUpdateFromTelegramChat(
-    message.chat.id
-  )
+  // const previousUpdate = await firebase.getPreviousUpdateFromTelegramChat(
+  // message.chat.id
+  // )
   await firebase.storeTelegramUpdate(update_id, message)
 
   switch (true) {
