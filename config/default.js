@@ -8,6 +8,6 @@ module.exports = {
   },
 
   dropbox: {
-    token: "KpJslsfNN9IAAAAAAABv--9cunH-5QK8CcZ5YyFps7wY2Sam2rUFbP2XS-ayDtxr"
+    token: "KpJslsfNN9IAAAAAAABwWx1WS_9T641cO6sKDPU2SdT3zDHYtY3U-0Ci5DNuwupl"
   }
 }

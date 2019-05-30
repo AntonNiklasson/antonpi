@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "nodemon -- -r dotenv/config src/app.js",
+    "dev": "docker-compose up",
     "deploy": "./scripts/deploy.sh"
   },
   "dependencies": {
@@ -9,6 +9,7 @@
     "cors": "^2.8.4",
     "dotenv-cli": "^1.4.0",
     "dropbox": "^4.0.17",
+    "esm": "^3.2.25",
     "express": "^4.16.3",
     "express-winston": "^3.0.1",
     "firebase-admin": "^5.12.1",

@@ -1,58 +1,77 @@
-const axios = require("axios")
-const dropboxSdk = require("dropbox").Dropbox
-const fetch = require("isomorphic-fetch")
-const config = require("config")
-const redis = require("../redis")
+import axios from "axios"
+import { Dropbox } from "dropbox"
+import fetch from "isomorphic-fetch"
+import config from "config"
+import _ from "lodash/fp"
+import { cache } from "../cache"
 
-const dbx = new dropboxSdk({
+function transformFile(file) {
+  return _.pipe(
+    _.pick(["id", "rev", "path_lower", "name", "size"]),
+    _.set(
+      "url",
+      `http://${config.get("host")}:${config.get("port")}/photos/${
+        file.id
+      }/thumbnail`
+    ),
+    _.set("size", { width: 960, height: 640 })
+  )(file)
+}
+
+const dbx = new Dropbox({
   accessToken: config.get("dropbox.token"),
   fetch
 })
 
-async function getFile(id) {
-  const files = await getAllFiles()
-  const requestedFile = files.find(f => f.id === id)
+export async function getFile(id) {
+  const key = `dropbox.${id}`
+  let file = await cache.get(key)
 
-  if (!requestedFile) {
-    return null
-  }
+  if (!file) {
+    const files = await getAllFiles()
+    const requestedFile = files.find(f => f.id === id)
 
-  try {
-    const response = await dbx.filesGetThumbnail({
-      path: requestedFile.path_lower,
-      size: {
-        ".tag": "w960h640"
-      }
-    })
+    if (!requestedFile) {
+      return null
+    }
 
-    return response.fileBinary
-  } catch (error) {
-    console.error(error)
-    return error
-  }
-}
-
-async function getAllFiles() {
-  const cacheKey = "dropbox.allfiles"
-  let response = redis.get(cacheKey)
-  let source = "cache"
-
-  if (!response) {
     try {
-      const response = await dbx.filesListFolder({
-        path: `/media/photos/featured`
+      const response = await dbx.filesGetThumbnail({
+        path: requestedFile.path_lower,
+        size: {
+          ".tag": "w960h640"
+        }
       })
-      source = "api"
-      redis.set(cacheKey, response)
+      file = response.fileBinary
+
+      cache.set(key, file)
     } catch (error) {
+      console.error(error)
       return error
     }
   }
 
-  return { source, data: response.entries }
+  return file
 }
 
-module.exports = {
-  getFile,
-  getAllFiles
+export async function getAllFiles() {
+  const key = "dropbox.files"
+  let files = await cache.get(key)
+
+  if (!files) {
+    try {
+      const response = await dbx.filesListFolder({
+        path: `/media/photos/featured`
+      })
+
+      files = response.entries.map(transformFile)
+
+      cache.set(key, files)
+    } catch (error) {
+      console.log("[Dropbox]", error)
+      return error
+    }
+  }
+
+  return files
 }

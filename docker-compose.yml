@@ -1,8 +1,10 @@
 version: '3'
 services:
-  web:
-    build: .
-    command: yarn dev
+  api:
+    image: node:12
+    container_name: antonpi-api
+    command: node_modules/.bin/nodemon -- -r esm -r dotenv/config src/app.js
+    working_dir: /app
     volumes:
       - ./:/app
     ports:
@@ -10,5 +12,6 @@ services:
     depends_on:
       - redis
   redis:
-    image: "redis:alpine"
+    image: redis
+    container_name: antonpi-redis
 
