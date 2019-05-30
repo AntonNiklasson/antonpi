@@ -1,12 +1,6 @@
-FROM node:8
+FROM node:11
 
 WORKDIR /app
-
 COPY . .
-
 RUN yarn
-
-ENV NODE_ENV=production
-EXPOSE 5001
-
-CMD node src/app.js
+#EXPOSE 5001

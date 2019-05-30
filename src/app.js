@@ -1,30 +1,24 @@
-const process = require("process")
-const express = require("express")
-const bodyParser = require("body-parser")
-const cors = require("cors")
-const telegram = require("./telegram")
-
-const winston = require("winston")
-const expressWinston = require("express-winston")
+import process from "process"
+import express from "express"
+import bodyParser from "body-parser"
+import cors from "cors"
+import _ from "lodash/fp"
+import config from "config"
+import { requestLogger } from "./logger"
+import telegram from "./integrations/telegram"
+import { getAllFiles, getFile } from "./integrations/dropbox"
 
 const app = express()
 app.use(bodyParser.json())
 app.use(cors())
+app.use(requestLogger)
 
 const stringify = data =>
   typeof data === "string" ? data : JSON.stringify(data, null, 2)
 
-app.use(
-  expressWinston.logger({
-    transports: [new winston.transports.Console()],
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.simple()
-    ),
-    meta: false,
-    colorize: false
-  })
-)
+app.get("/", (req, res) => {
+  return res.sendStatus(200)
+})
 
 app.post("/notify/telegram", (req, res) => {
   const payload = req.body
@@ -34,10 +28,27 @@ app.post("/notify/telegram", (req, res) => {
   return res.sendStatus(200)
 })
 
-app.get("*", (req, res) => {
-  return res.sendStatus(404)
+app.get("/photos", async (req, res) => {
+  const files = await getAllFiles()
+
+  return res.send(files)
 })
 
-app.listen(process.env.PORT, () => {
-  console.log(`AntonPI is running on port ${process.env.PORT}`)
+app.get("/photos/:id/thumbnail", async (req, res) => {
+  const { id } = req.params
+  const file = await getFile(id)
+
+  if (!file) {
+    return res.sendStatus(404)
+  }
+
+  return res.set("Content-Type", "image/jpeg").send(file)
+})
+
+app.use("*", (req, res) => res.sendStatus(404))
+
+const listener = app.listen(config.get("port"), () => {
+  console.log(
+    `> AntonPI running on ${config.get("host")}:${listener.address().port}`
+  )
 })
