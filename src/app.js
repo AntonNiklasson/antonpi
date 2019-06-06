@@ -1,13 +1,10 @@
-import process from "process"
 import express from "express"
 import bodyParser from "body-parser"
 import cors from "cors"
-import _ from "lodash/fp"
 import config from "config"
 import { requestLogger } from "./logger"
 import telegram from "./integrations/telegram"
 import { getAllFiles, getFile } from "./integrations/dropbox"
-
 const app = express()
 app.use(bodyParser.json())
 app.use(cors())
@@ -48,6 +45,7 @@ app.get("/photos/:id/thumbnail", async (req, res) => {
 app.use("*", (req, res) => res.sendStatus(404))
 
 const listener = app.listen(config.get("port"), () => {
+  // eslint-disable-next-line no-console
   console.log(
     `> AntonPI running on ${config.get("host")}:${listener.address().port}`
   )

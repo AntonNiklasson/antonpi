@@ -1,6 +1,0 @@
-FROM node:11
-
-WORKDIR /app
-COPY . .
-RUN yarn
-#EXPOSE 5001

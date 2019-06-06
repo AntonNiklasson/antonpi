@@ -1,7 +1,9 @@
 {
+  "private": true,
   "scripts": {
-    "dev": "docker-compose up",
-    "deploy": "./scripts/deploy.sh"
+    "dev": "nodemon -- -r esm -r dotenv/config src/app.js",
+    "deploy": "./scripts/deploy.sh",
+    "prod:run": "docker-compose -f docker/docker-compose.prod.yml up"
   },
   "dependencies": {
     "babel-eslint": "^10.0.1",
@@ -23,6 +25,5 @@
     "redis": "^2.8.0",
     "supertest": "^4.0.2",
     "winston": "^3.2.1"
-  },
-  "private": true
+  }
 }

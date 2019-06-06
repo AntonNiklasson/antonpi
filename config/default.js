@@ -1,13 +1,14 @@
 module.exports = {
   host: "localhost",
   port: 5001,
+  domain: "http://localhost",
 
-  redis: {
-    port: 6379,
+  cache: {
+    driver: "memory",
     ttl: 60
   },
 
   dropbox: {
-    token: "KpJslsfNN9IAAAAAAABwWx1WS_9T641cO6sKDPU2SdT3zDHYtY3U-0Ci5DNuwupl"
+    token: process.env.DROPBOX_TOKEN
   }
 }

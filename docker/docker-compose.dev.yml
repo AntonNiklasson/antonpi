@@ -14,4 +14,3 @@ services:
   redis:
     image: redis
     container_name: antonpi-redis
-

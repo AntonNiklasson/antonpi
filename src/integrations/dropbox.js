@@ -1,19 +1,12 @@
-import axios from "axios"
 import { Dropbox } from "dropbox"
 import fetch from "isomorphic-fetch"
 import config from "config"
 import _ from "lodash/fp"
 import { cache } from "../cache"
-
 function transformFile(file) {
   return _.pipe(
     _.pick(["id", "rev", "path_lower", "name", "size"]),
-    _.set(
-      "url",
-      `http://${config.get("host")}:${config.get("port")}/photos/${
-        file.id
-      }/thumbnail`
-    ),
+    _.set("url", `${config.get("domain")}/photos/${file.id}/thumbnail`),
     _.set("size", { width: 960, height: 640 })
   )(file)
 }
@@ -55,13 +48,13 @@ export async function getFile(id) {
 }
 
 export async function getAllFiles() {
-  const key = "dropbox.files"
+  let key = "dropbox.files"
   let files = await cache.get(key)
 
   if (!files) {
     try {
       const response = await dbx.filesListFolder({
-        path: `/media/photos/featured`
+        path: ``
       })
 
       files = response.entries.map(transformFile)
