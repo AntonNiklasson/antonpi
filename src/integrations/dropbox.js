@@ -1,8 +1,9 @@
 import { Dropbox } from "dropbox"
-import fetch from "isomorphic-fetch"
-import config from "config"
-import _ from "lodash/fp"
+import * as fetch from "isomorphic-fetch"
+import * as config from "config"
+import * as _ from "lodash/fp"
 import { cache } from "../cache"
+
 function transformFile(file) {
   return _.pipe(
     _.pick(["id", "rev", "path_lower", "name", "size"]),

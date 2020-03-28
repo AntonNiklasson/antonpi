@@ -1,5 +1,6 @@
-import config from "config"
+import * as config from "config"
 
 const driver = config.get("cache.driver")
 
-export const cache = driver === 'redis' ? require('./redis.js') : require('./memory');
+export const cache =
+  driver === "redis" ? require("./redis.js") : require("./memory")

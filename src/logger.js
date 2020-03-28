@@ -1,5 +1,5 @@
-import winston from "winston"
-import expressWinston from "express-winston"
+import * as winston from "winston"
+import * as expressWinston from "express-winston"
 
 export const requestLogger = expressWinston.logger({
   transports: [new winston.transports.Console()],

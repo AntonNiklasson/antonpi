@@ -67,7 +67,7 @@ const constructCheckString = payload => {
   )(payload)
 }
 
-module.exports = {
+export default {
   checkPayloadIntegrity,
   executeCommand,
   sendMessage,
